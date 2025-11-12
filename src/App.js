@@ -268,8 +268,8 @@ const SlideItem = ({
     <div
       style={{
         width: "100%",
-        height: "100vh",
-        minHeight: "100vh",
+        minHeight: isMobile ? "60vh" : "100vh",
+        height: isMobile ? "auto" : "100vh",
         position: "relative",
         borderBottom: "2px solid #333",
         flexShrink: 0,
@@ -309,13 +309,13 @@ const SlideItem = ({
           src={fileUrl}
           title={`Presentation ${index + 1}`}
           width="100%"
-          height="100%"
+          height={isMobile ? "90vh" : "100%"}
           frameBorder="0"
           allowFullScreen
           scrolling="yes"
           style={{
             border: "none",
-            backgroundColor: "#000",
+            backgroundColor: "transparent",
             display: "block",
             position: "relative",
             zIndex: 0,
@@ -329,14 +329,14 @@ const SlideItem = ({
           src={fileUrl}
           title={`Presentation ${index + 1}`}
           width="100%"
-          height="100%"
+          height={isMobile ? "90vh" : "100%"}
           frameBorder="0"
           allowFullScreen
           scrolling="yes"
           allow="autoplay; fullscreen"
           style={{
             border: "none",
-            backgroundColor: "#000",
+            backgroundColor: "transparent",
             display: "block",
             position: "relative",
             zIndex: 0,
