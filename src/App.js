@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from "react";
 
 function App() {
-  // Hardcoded file type mapping for each slider
+  // Hardcoded file type mapping
   const fileTypeMap = {
-    1: "pptx", // slider-1 only has PPTX
-    2: "pdf",  // slider-2 has PDF (preferred if both exist)
-    // Add more mappings as needed
+    1: "pptx",
+    2: "pdf",
+    // Add more as needed
   };
 
-  // Generate list of all files (1-38)
+  // Generate list of all slides
   const slideFiles = useMemo(() => {
     if (typeof window === "undefined") return [];
 
@@ -19,27 +19,19 @@ function App() {
       baseUrl && baseUrl !== "/" ? `${baseUrl.replace(/\/$/, "")}` : "";
 
     for (let i = 1; i <= 38; i++) {
-      const pdfFileName = `slider-${i}.pdf`;
-      const pptxFileName = `slider-${i}.pptx`;
-      const pdfFileUrl = `${origin}${normalizedBaseUrl}/${pdfFileName}`;
-      const pptxFileUrl = `${origin}${normalizedBaseUrl}/${pptxFileName}`;
-
-      const pptxOfficeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-        pptxFileUrl
-      )}`;
-      const pptxGoogleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
-        pptxFileUrl
-      )}&embedded=true`;
-      const pdfJsViewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html`;
+      const pdfFileUrl = `${origin}${normalizedBaseUrl}/slider-${i}.pdf`;
+      const pptxFileUrl = `${origin}${normalizedBaseUrl}/slider-${i}.pptx`;
 
       files.push({
-        pdfFileName,
-        pptxFileName,
         pdfFileUrl,
         pptxFileUrl,
-        pdfJsViewerUrl,
-        pptxOfficeViewerUrl,
-        pptxGoogleViewerUrl,
+        pdfJsViewerUrl: "https://mozilla.github.io/pdf.js/web/viewer.html",
+        pptxOfficeViewerUrl: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+          pptxFileUrl
+        )}`,
+        pptxGoogleViewerUrl: `https://docs.google.com/viewer?url=${encodeURIComponent(
+          pptxFileUrl
+        )}&embedded=true`,
       });
     }
 
@@ -49,7 +41,7 @@ function App() {
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [useOfficeViewer, setUseOfficeViewer] = useState(true);
 
-  // Detect mobile devices
+  // Detect mobile
   const isMobile = useMemo(() => {
     if (typeof window === "undefined" || typeof navigator === "undefined")
       return false;
@@ -61,31 +53,26 @@ function App() {
     return isSmallScreen || isMobileUserAgent;
   }, []);
 
-  // Get file type for a slide
   const getFileType = (index) => {
     const slideNumber = index + 1;
     return fileTypeMap[slideNumber] || "pdf";
   };
 
-  // Get URL for a slide
   const getFileUrl = (index) => {
     const fileType = getFileType(index);
     const file = slideFiles[index];
 
     if (fileType === "pdf") {
-      // Use PDF.js with no toolbar, no sidebar, zoom fit
+      // Use PDF.js with no toolbar/sidebar/scrollbar
       return `${file.pdfJsViewerUrl}?file=${encodeURIComponent(
         file.pdfFileUrl
       )}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`;
     } else {
-      // PPTX: Office Viewer preferred, fallback to Google Viewer
       return useOfficeViewer
         ? file.pptxOfficeViewerUrl
         : file.pptxGoogleViewerUrl;
     }
   };
-
-  const getCurrentFileUrl = () => getFileUrl(currentFileIndex);
 
   const handlePrevFile = () => {
     if (currentFileIndex > 0) setCurrentFileIndex(currentFileIndex - 1);
@@ -113,7 +100,7 @@ function App() {
       }}
     >
       {isMobile ? (
-        <div style={{ width: "100%", display: "block", position: "relative" }}>
+        <div style={{ width: "100%", display: "block" }}>
           {slideFiles.map((file, index) => (
             <SlideItem
               key={index}
@@ -191,7 +178,7 @@ function App() {
           {/* Viewer */}
           <iframe
             key={`${currentFileIndex}-${getFileType(currentFileIndex)}-${useOfficeViewer}`}
-            src={getCurrentFileUrl()}
+            src={getFileUrl(currentFileIndex)}
             title={`Slide ${currentFileIndex + 1}`}
             width="100%"
             height="100%"
@@ -199,7 +186,6 @@ function App() {
             allowFullScreen
             style={{ border: "none", backgroundColor: "#000" }}
             onError={() => {
-              // fallback for PPTX
               if (useOfficeViewer && getFileType(currentFileIndex) === "pptx") {
                 setUseOfficeViewer(false);
               }
