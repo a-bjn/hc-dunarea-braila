@@ -2,109 +2,98 @@ import React, { useState, useMemo } from "react";
 
 function App() {
   // Hardcoded file type mapping for each slider
-  // 'pptx' = only PPTX available, 'pdf' = PDF available (preferred if both exist)
   const fileTypeMap = {
-    1: 'pptx',  // slider-1 only has PPTX
-    2: 'pdf',   // slider-2 has both PDF and PPTX, prefer PDF
+    1: "pptx", // slider-1 only has PPTX
+    2: "pdf",  // slider-2 has PDF (preferred if both exist)
     // Add more mappings as needed
-    // 3: 'pdf',
-    // 4: 'pptx',
-    // ... etc
-    // Default to 'pdf' if not specified
   };
 
   // Generate list of all files (1-38)
   const slideFiles = useMemo(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
+    if (typeof window === "undefined") return [];
+
     const files = [];
     const baseUrl = process.env.PUBLIC_URL || "";
     const origin = window.location?.origin || "";
     const normalizedBaseUrl =
       baseUrl && baseUrl !== "/" ? `${baseUrl.replace(/\/$/, "")}` : "";
+
     for (let i = 1; i <= 38; i++) {
       const pdfFileName = `slider-${i}.pdf`;
       const pptxFileName = `slider-${i}.pptx`;
       const pdfFileUrl = `${origin}${normalizedBaseUrl}/${pdfFileName}`;
       const pptxFileUrl = `${origin}${normalizedBaseUrl}/${pptxFileName}`;
-      
-      // For PPTX, use Office Online Viewer
-      const pptxOfficeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pptxFileUrl)}`;
-      const pptxGoogleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pptxFileUrl)}&embedded=true`;
-      const pdfGoogleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfFileUrl)}&embedded=true`;
-      const pdfJsViewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfFileUrl)}`;
-      
+
+      const pptxOfficeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+        pptxFileUrl
+      )}`;
+      const pptxGoogleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
+        pptxFileUrl
+      )}&embedded=true`;
+      const pdfJsViewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html`;
+
       files.push({
         pdfFileName,
         pptxFileName,
         pdfFileUrl,
         pptxFileUrl,
-        pdfGoogleViewerUrl,
         pdfJsViewerUrl,
         pptxOfficeViewerUrl,
         pptxGoogleViewerUrl,
       });
     }
+
     return files;
   }, []);
 
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
-  const [useOfficeViewer, setUseOfficeViewer] = useState(true); // For PPTX viewer
+  const [useOfficeViewer, setUseOfficeViewer] = useState(true);
 
-  // Detect if device is mobile
+  // Detect mobile devices
   const isMobile = useMemo(() => {
-    if (typeof window === "undefined" || typeof navigator === "undefined") {
+    if (typeof window === "undefined" || typeof navigator === "undefined")
       return false;
-    }
-    // Check screen width
+
     const isSmallScreen = window.innerWidth <= 768;
-    // Check user agent for mobile devices
     const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
     return isSmallScreen || isMobileUserAgent;
   }, []);
 
-  // Get file type for a specific slide index (0-based)
+  // Get file type for a slide
   const getFileType = (index) => {
-    // Use the mapping (same for mobile and desktop)
-    // PDF is preferred when available, PPTX otherwise
-    const slideNumber = index + 1; // Convert to 1-based
-    return fileTypeMap[slideNumber] || 'pdf'; // Default to 'pdf' if not specified
+    const slideNumber = index + 1;
+    return fileTypeMap[slideNumber] || "pdf";
   };
 
-  // Get file URL for a specific slide index
+  // Get URL for a slide
   const getFileUrl = (index) => {
     const fileType = getFileType(index);
     const file = slideFiles[index];
 
-    if (fileType === 'pdf') {
-      // Add parameters to force inline viewing - remove scrollbar=0 to allow scrolling
-      return `${file?.pdfFileUrl}#toolbar=0&navpanes=0&view=FitH`;
+    if (fileType === "pdf") {
+      // Use PDF.js with no toolbar, no sidebar, zoom fit
+      return `${file.pdfJsViewerUrl}?file=${encodeURIComponent(
+        file.pdfFileUrl
+      )}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`;
     } else {
-      // Use Office Viewer for PPTX
+      // PPTX: Office Viewer preferred, fallback to Google Viewer
       return useOfficeViewer
-        ? file?.pptxOfficeViewerUrl
-        : file?.pptxGoogleViewerUrl;
+        ? file.pptxOfficeViewerUrl
+        : file.pptxGoogleViewerUrl;
     }
   };
 
-  // Get current file URL based on file type (for desktop)
-  const getCurrentFileUrl = () => {
-    return getFileUrl(currentFileIndex);
-  };
+  const getCurrentFileUrl = () => getFileUrl(currentFileIndex);
 
   const handlePrevFile = () => {
-    if (currentFileIndex > 0) {
-      setCurrentFileIndex(currentFileIndex - 1);
-    }
+    if (currentFileIndex > 0) setCurrentFileIndex(currentFileIndex - 1);
   };
 
   const handleNextFile = () => {
-    if (currentFileIndex < slideFiles.length - 1) {
+    if (currentFileIndex < slideFiles.length - 1)
       setCurrentFileIndex(currentFileIndex + 1);
-    }
   };
 
   return (
@@ -112,33 +101,25 @@ function App() {
       style={{
         width: "100%",
         height: isMobile ? "auto" : "100vh",
-        minHeight: isMobile ? "100vh" : "100vh",
+        minHeight: "100vh",
         margin: 0,
         padding: 0,
         overflow: isMobile ? "visible" : "hidden",
         backgroundColor: "#000",
         display: isMobile ? "block" : "flex",
-        flexDirection: isMobile ? "column" : "column",
+        flexDirection: "column",
         position: "relative",
-        WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+        WebkitOverflowScrolling: "touch",
       }}
     >
       {isMobile ? (
-        /* Mobile: Scrollable list of all slides with lazy loading */
-        <div
-          style={{
-            width: "100%",
-            display: "block",
-            position: "relative",
-          }}
-        >
+        <div style={{ width: "100%", display: "block", position: "relative" }}>
           {slideFiles.map((file, index) => (
             <SlideItem
               key={index}
               index={index}
               file={file}
               getFileType={getFileType}
-              getFileUrl={getFileUrl}
               useOfficeViewer={useOfficeViewer}
               setUseOfficeViewer={setUseOfficeViewer}
               isMobile={isMobile}
@@ -146,9 +127,8 @@ function App() {
           ))}
         </div>
       ) : (
-        /* Desktop: Single slide view with navigation */
         <>
-          {/* Navigation Controls */}
+          {/* Navigation */}
           <div
             style={{
               position: "absolute",
@@ -162,7 +142,7 @@ function App() {
               backgroundColor: "rgba(0, 0, 0, 0.9)",
               padding: "10px 20px",
               borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
             }}
           >
             <button
@@ -175,7 +155,6 @@ function App() {
                 border: "none",
                 borderRadius: "4px",
                 cursor: currentFileIndex === 0 ? "not-allowed" : "pointer",
-                fontSize: "14px",
               }}
             >
               ← Previous
@@ -183,8 +162,7 @@ function App() {
             <span
               style={{
                 color: "white",
-                fontSize: "14px",
-                minWidth: "120px",
+                minWidth: "80px",
                 textAlign: "center",
               }}
             >
@@ -204,42 +182,29 @@ function App() {
                   currentFileIndex === slideFiles.length - 1
                     ? "not-allowed"
                     : "pointer",
-                fontSize: "14px",
               }}
             >
               Next →
             </button>
           </div>
 
-          {/* Document Viewer */}
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              flex: 1,
-              position: "relative",
+          {/* Viewer */}
+          <iframe
+            key={`${currentFileIndex}-${getFileType(currentFileIndex)}-${useOfficeViewer}`}
+            src={getCurrentFileUrl()}
+            title={`Slide ${currentFileIndex + 1}`}
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            allowFullScreen
+            style={{ border: "none", backgroundColor: "#000" }}
+            onError={() => {
+              // fallback for PPTX
+              if (useOfficeViewer && getFileType(currentFileIndex) === "pptx") {
+                setUseOfficeViewer(false);
+              }
             }}
-          >
-            <iframe
-              key={`${currentFileIndex}-${getFileType(currentFileIndex)}-${useOfficeViewer}`}
-              src={getCurrentFileUrl()}
-              title={`Presentation ${currentFileIndex + 1}`}
-              width="100%"
-              height="100%"
-              frameBorder="0"
-              allowFullScreen
-              style={{
-                border: "none",
-                backgroundColor: "#000",
-              }}
-              onError={() => {
-                // If Office Viewer fails, try Google Viewer as fallback
-                if (useOfficeViewer && getFileType(currentFileIndex) === 'pptx') {
-                  setUseOfficeViewer(false);
-                }
-              }}
-            />
-          </div>
+          />
         </>
       )}
     </div>
@@ -250,19 +215,20 @@ const SlideItem = ({
   index,
   file,
   getFileType,
-  getFileUrl,
   useOfficeViewer,
   setUseOfficeViewer,
   isMobile,
 }) => {
   const fileType = getFileType(index);
-  const baseFileUrl = getFileUrl(index);
-  const pdfViewerUrl = file?.pdfJsViewerUrl
-    ? `${file.pdfJsViewerUrl}#toolbar=0&navpanes=0&zoom=page-fit`
-    : baseFileUrl;
-  const fileUrl = fileType === 'pdf' ? pdfViewerUrl : baseFileUrl;
 
-  const shouldShowScrollOverlay = !(isMobile && fileType === 'pptx');
+  const fileUrl =
+    fileType === "pdf"
+      ? `${file.pdfJsViewerUrl}?file=${encodeURIComponent(
+          file.pdfFileUrl
+        )}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`
+      : useOfficeViewer
+      ? file.pptxOfficeViewerUrl
+      : file.pptxGoogleViewerUrl;
 
   return (
     <div
@@ -276,80 +242,29 @@ const SlideItem = ({
         touchAction: "pan-y",
       }}
     >
-      {shouldShowScrollOverlay && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "30px",
-              height: "100%",
-              zIndex: 10,
-              touchAction: "pan-y",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: "30px",
-              height: "100%",
-              zIndex: 10,
-              touchAction: "pan-y",
-            }}
-          />
-        </>
-      )}
-      {fileType === 'pdf' ? (
-        // Use iframe for PDFs with proper attributes for inline display
-        <iframe
-          key={`${index}-pdf`}
-          src={fileUrl}
-          title={`Presentation ${index + 1}`}
-          width="100%"
-          height="100%"
-          allowFullScreen
-          scrolling="no"
-          style={{
-            border: "none",
-            backgroundColor: "#000",
-            display: "block",
-            position: "relative",
-            zIndex: 0,
-            pointerEvents: "auto", // Allow interactions for videos
-            WebkitOverflowScrolling: "touch",
-          }}
-        />
-      ) : (
-        <iframe
-          key={`${index}-${fileType}-${useOfficeViewer}`}
-          src={fileUrl}
-          title={`Presentation ${index + 1}`}
-          width="100%"
-          height="100%"
-          allowFullScreen
-          scrolling="yes"
-          allow="autoplay; fullscreen"
-          style={{
-            border: "none",
-            backgroundColor: "#000",
-            display: "block",
-            position: "relative",
-            zIndex: 0,
-            pointerEvents:
-              isMobile && fileType === 'pptx' ? "none" : "auto", // Allow mobile scrolling without overlay
-            WebkitOverflowScrolling: "touch",
-          }}
-          onError={() => {
-            // If Office Viewer fails, try Google Viewer as fallback
-            if (useOfficeViewer && fileType === 'pptx') {
-              setUseOfficeViewer(false);
-            }
-          }}
-        />
-      )}
+      <iframe
+        key={`${index}-${fileType}-${useOfficeViewer}`}
+        src={fileUrl}
+        title={`Slide ${index + 1}`}
+        width="100%"
+        height="100%"
+        allowFullScreen
+        scrolling="no"
+        style={{
+          border: "none",
+          backgroundColor: "#000",
+          display: "block",
+          position: "relative",
+          zIndex: 0,
+          pointerEvents: "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
+        onError={() => {
+          if (useOfficeViewer && fileType === "pptx") {
+            setUseOfficeViewer(false);
+          }
+        }}
+      />
     </div>
   );
 };
