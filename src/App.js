@@ -27,6 +27,7 @@ function App() {
       const pptxOfficeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pptxFileUrl)}`;
       const pptxGoogleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pptxFileUrl)}&embedded=true`;
       const pdfGoogleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfFileUrl)}&embedded=true`;
+      const pdfJsViewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfFileUrl)}`;
       
       files.push({
         pdfFileName,
@@ -34,6 +35,7 @@ function App() {
         pdfFileUrl,
         pptxFileUrl,
         pdfGoogleViewerUrl,
+        pdfJsViewerUrl,
         pptxOfficeViewerUrl,
         pptxGoogleViewerUrl,
       });
@@ -263,7 +265,7 @@ const SlideItem = ({
   const baseFileUrl = getFileUrl(index);
   const fileUrl =
     fileType === 'pdf' && isMobile
-      ? file?.pdfGoogleViewerUrl || baseFileUrl
+      ? file?.pdfJsViewerUrl || file?.pdfGoogleViewerUrl || baseFileUrl
       : baseFileUrl;
 
   const shouldShowScrollOverlay = !(isMobile && fileType === 'pptx');
