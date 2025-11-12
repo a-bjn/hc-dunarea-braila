@@ -257,10 +257,10 @@ const SlideItem = ({
 }) => {
   const fileType = getFileType(index);
   const baseFileUrl = getFileUrl(index);
-  const fileUrl =
-    fileType === 'pdf' && isMobile
-      ? file?.pdfJsViewerUrl || file?.pdfGoogleViewerUrl || baseFileUrl
-      : baseFileUrl;
+  const pdfViewerUrl = file?.pdfJsViewerUrl
+    ? `${file.pdfJsViewerUrl}#toolbar=0&navpanes=0&zoom=page-fit`
+    : baseFileUrl;
+  const fileUrl = fileType === 'pdf' ? pdfViewerUrl : baseFileUrl;
 
   const shouldShowScrollOverlay = !(isMobile && fileType === 'pptx');
 
@@ -311,7 +311,7 @@ const SlideItem = ({
           width="100%"
           height="100%"
           allowFullScreen
-          scrolling="yes"
+          scrolling="no"
           style={{
             border: "none",
             backgroundColor: "#000",
