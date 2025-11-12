@@ -15,13 +15,19 @@ function App() {
 
   // Generate list of all files (1-38)
   const slideFiles = useMemo(() => {
+    if (typeof window === "undefined") {
+      return [];
+    }
     const files = [];
-    const baseUrl = process.env.PUBLIC_URL || '';
+    const baseUrl = process.env.PUBLIC_URL || "";
+    const origin = window.location?.origin || "";
+    const normalizedBaseUrl =
+      baseUrl && baseUrl !== "/" ? `${baseUrl.replace(/\/$/, "")}` : "";
     for (let i = 1; i <= 38; i++) {
       const pdfFileName = `slider-${i}.pdf`;
       const pptxFileName = `slider-${i}.pptx`;
-      const pdfFileUrl = `${window.location.origin}${baseUrl}/${pdfFileName}`;
-      const pptxFileUrl = `${window.location.origin}${baseUrl}/${pptxFileName}`;
+      const pdfFileUrl = `${origin}${normalizedBaseUrl}/${pdfFileName}`;
+      const pptxFileUrl = `${origin}${normalizedBaseUrl}/${pptxFileName}`;
       
       // For PPTX, use Office Online Viewer
       const pptxOfficeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pptxFileUrl)}`;
@@ -49,6 +55,9 @@ function App() {
 
   // Detect if device is mobile
   const isMobile = useMemo(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return false;
+    }
     // Check screen width
     const isSmallScreen = window.innerWidth <= 768;
     // Check user agent for mobile devices
