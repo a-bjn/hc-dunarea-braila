@@ -268,8 +268,8 @@ const SlideItem = ({
     <div
       style={{
         width: "100%",
-        minHeight: isMobile ? "70vh" : "100vh",
-        height: isMobile ? "auto" : "100vh",
+        height: "100vh",
+        minHeight: "100vh",
         position: "relative",
         borderBottom: "2px solid #333",
         flexShrink: 0,
@@ -309,21 +309,19 @@ const SlideItem = ({
           src={fileUrl}
           title={`Presentation ${index + 1}`}
           width="100%"
-          height={isMobile ? "95vh" : "100%"}
+          height="100%"
           frameBorder="0"
           allowFullScreen
           scrolling="yes"
-        style={{
-          border: "none",
-          backgroundColor: "transparent",
-          display: "block",
-          position: "relative",
-          zIndex: 0,
-          pointerEvents: "auto", // Allow interactions for videos
-          WebkitOverflowScrolling: "touch",
-          transform: isMobile && fileType === 'pdf' ? "scale(1.05)" : "none",
-          transformOrigin: "top center",
-        }}
+          style={{
+            border: "none",
+            backgroundColor: "#000",
+            display: "block",
+            position: "relative",
+            zIndex: 0,
+            pointerEvents: "auto", // Allow interactions for videos
+            WebkitOverflowScrolling: "touch",
+          }}
         />
       ) : (
         <iframe
@@ -331,22 +329,20 @@ const SlideItem = ({
           src={fileUrl}
           title={`Presentation ${index + 1}`}
           width="100%"
-          height={isMobile ? "95vh" : "100%"}
+          height="100%"
           frameBorder="0"
           allowFullScreen
           scrolling="yes"
           allow="autoplay; fullscreen"
           style={{
             border: "none",
-            backgroundColor: "transparent",
+            backgroundColor: "#000",
             display: "block",
             position: "relative",
             zIndex: 0,
             pointerEvents:
               isMobile && fileType === 'pptx' ? "none" : "auto", // Allow mobile scrolling without overlay
             WebkitOverflowScrolling: "touch",
-            transform: isMobile && fileType === 'pdf' ? "scale(1.05)" : "none",
-            transformOrigin: "top center",
           }}
           onError={() => {
             // If Office Viewer fails, try Google Viewer as fallback
