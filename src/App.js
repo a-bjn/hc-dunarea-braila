@@ -50,7 +50,6 @@ function App() {
   }, []);
 
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [useOfficeViewer, setUseOfficeViewer] = useState(true); // For PPTX viewer
 
   // Detect if device is mobile
@@ -96,26 +95,15 @@ function App() {
     return getFileUrl(currentFileIndex);
   };
 
-  // Debug: Log file URLs
-  useEffect(() => {
-    if (slideFiles.length > 0) {
-      const fileType = getFileType(currentFileIndex);
-      console.log('Current file type:', fileType);
-      console.log('Current file URL:', getCurrentFileUrl());
-    }
-  }, [slideFiles, currentFileIndex, useOfficeViewer]);
-
   const handlePrevFile = () => {
     if (currentFileIndex > 0) {
       setCurrentFileIndex(currentFileIndex - 1);
-      setLoading(true);
     }
   };
 
   const handleNextFile = () => {
     if (currentFileIndex < slideFiles.length - 1) {
       setCurrentFileIndex(currentFileIndex + 1);
-      setLoading(true);
     }
   };
 
@@ -244,13 +232,10 @@ function App() {
                 border: "none",
                 backgroundColor: "#000",
               }}
-              onLoad={() => setLoading(false)}
               onError={() => {
-                setLoading(false);
                 // If Office Viewer fails, try Google Viewer as fallback
                 if (useOfficeViewer && getFileType(currentFileIndex) === 'pptx') {
                   setUseOfficeViewer(false);
-                  setLoading(true);
                 }
               }}
             />
