@@ -310,7 +310,6 @@ const SlideItem = ({
           title={`Presentation ${index + 1}`}
           width="100%"
           height="100%"
-          frameBorder="0"
           allowFullScreen
           scrolling="yes"
           style={{
@@ -330,7 +329,6 @@ const SlideItem = ({
           title={`Presentation ${index + 1}`}
           width="100%"
           height="100%"
-          frameBorder="0"
           allowFullScreen
           scrolling="yes"
           allow="autoplay; fullscreen"
